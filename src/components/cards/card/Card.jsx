@@ -5,7 +5,7 @@ const Card=(props) =>{
    let classe=["Card",props.color];
    let info="";
    if(props.name==="Infected"){
-       info="Number of active cases of COVID-19";
+       info="Number of total cases of COVID-19";
    }
    if(props.name==="Recovered"){
     info="Number of recovered cases of COVID-19";
