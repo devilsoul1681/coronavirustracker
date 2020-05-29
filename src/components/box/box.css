@@ -1,0 +1,17 @@
+.Select{
+    width: 50%;
+    margin: 0 auto;
+    margin-top: 70px;
+    padding: 5px 5px;
+    font-size: 15px;
+    color: white;
+    box-shadow: 0 10px 40px 0 rgb(0,0,0,0.3);
+    background-color:#888;
+}
+
+
+@media (max-width:700px){
+    .Select{
+        margin-top: 40px;
+    }
+}

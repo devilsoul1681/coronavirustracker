@@ -1,0 +1,37 @@
+.Card{
+    background-color: white;
+    box-shadow: 0 20px 30px 0 rgba(0,0,0, 0.2);
+    width: 18%;
+    margin: 0 auto;
+    text-align: center;
+    padding: 8px 8px;;
+}
+.red{
+    border-bottom: 10px solid rgba(255,0,0,0.5);
+}
+
+.blue{
+    border-bottom: 10px solid  rgba(0,0,255,0.6);
+}
+
+.green{
+    border-bottom: 10px solid rgba(0,255,0,0.6);
+}
+
+.red:hover{
+    box-shadow: 0 20px 30px 0 rgba(255,0,0,0.6);
+}
+.green:hover{
+    box-shadow: 0 20px 30px 0 rgba(0,255,0,0.4);
+}
+.blue:hover{
+    box-shadow: 0 20px 30px 0 rgba(0,0,255,0.4);
+}
+
+
+@media (max-width:700px){
+    .Card{
+        width:60%;
+        margin-bottom: 40px;
+      }
+}

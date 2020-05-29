@@ -1,0 +1,13 @@
+.Cards{
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    margin-top: 40px;
+}
+
+@media (max-width:700px){
+    .Cards{
+      flex-direction: column;
+    }
+}
+
