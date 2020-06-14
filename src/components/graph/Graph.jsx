@@ -9,7 +9,7 @@ function Graph(props){
             backgroundColor: [" rgba(0,0,255,0.6)","rgba(0,255,0,0.6)","rgba(255,0,0,0.5)"],
             borderColor: 'rgba(0,0,0,1)',
             borderWidth: 2,
-            data: [props.confirmed,props.recovered,props.deaths]
+            data: [props.confirmed-props.recovered-props.deaths,props.recovered,props.deaths]
           }
         ]
       }
@@ -21,7 +21,7 @@ function Graph(props){
                   labels:props.globaldata.map(({date}) =>date),
                   datasets:[{
                       data:props.globaldata.map(({confirmed}) =>confirmed),
-                      label:"Infected",
+                      label:"Total Cases",
                       borderColor:"#3333ff",
                       fill:true
                   },{

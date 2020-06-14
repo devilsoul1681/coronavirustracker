@@ -7,6 +7,8 @@ import Box from "./components/box/Box";
 import Graph from "./components/graph/Graph";
 import Spinner from "./components/Spinner/Spinner";
 import image from "../src/assest/images/download.jpg"
+import Modal from "./components/Modal/Modal";
+import Buttons from "./components/Buttons/Buttons";
 const App=() =>{
   const [data,setdata]=React.useState({
     confirmed:"",
@@ -18,7 +20,9 @@ const App=() =>{
   const [lastupdate,setlastupdate]=React.useState("")
   const [country,setcountry]=React.useState("Global");
   const [overall,setoverall]=React.useState([]);
-  const [error,seterror]=React.useState(false)
+  const [error,seterror]=React.useState(false);
+  const [show,setshow]=React.useState(false);
+  const [type,settype]=React.useState("");
   function onchange(events){
     setcountry(events.target.value)
   }
@@ -95,6 +99,21 @@ const App=() =>{
      }
   },[country])
 
+  function onclickblue(){
+    setshow(true);
+    settype("Confirmed");
+  }
+
+  function onclickred(){
+    setshow(true);
+    settype("Deaths");
+  }
+
+  function crossclick(){
+    setshow(false);
+    settype("");
+  }
+
   if(spinner===true){
     return <Spinner />
   }
@@ -105,7 +124,9 @@ const App=() =>{
     <Aux>
     <img src={image}></img>
     <Cards {...data} update={lastupdate} />
+    {show?<Modal show={show} type={type} crossclick={crossclick}/>:null}
     <Box countries={countries} clicked={onchange} value={country}/>
+    <Buttons onclickred={onclickred} onclickblue={onclickblue}/>
     <Graph {...data} globaldata={overall} country={country}/>
     </Aux>
   )

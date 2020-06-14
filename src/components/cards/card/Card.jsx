@@ -4,7 +4,7 @@ import Countup from "react-countup";
 const Card=(props) =>{
    let classe=["Card",props.color];
    let info="";
-   if(props.name==="Infected"){
+   if(props.name==="Total Cases"){
        info="Number of total cases of COVID-19";
    }
    if(props.name==="Recovered"){
