@@ -1,10 +1,18 @@
 import React from "react";
-import "./spinner.css"
-function Spinner(){
-    return <div style={{textAlign:"center",marginTop:300}}>
-    <h2>LOADING</h2>
-    <div className="loader">
-    </div></div>
-}
+import "./spinner.css";
 
-export default Spinner
+const Spinner = () => {
+  return (
+    <div className="spinner-overlay">
+      <div className="modern-spinner">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <p>Fetching latest data...</p>
+    </div>
+  );
+};
+
+export default Spinner;
