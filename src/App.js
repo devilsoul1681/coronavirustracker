@@ -1,135 +1,142 @@
 import React from "react";
-import Cards from "./components/cards/Cards"
+import Cards from "./components/cards/Cards";
 import "./App.css";
-import Aux from "./hoc/Auxillary/Auxillary"
-import axios from "axios"
+import axios from "axios";
 import Box from "./components/box/Box";
 import Graph from "./components/graph/Graph";
 import Spinner from "./components/Spinner/Spinner";
-import image from "../src/assest/images/download.jpg"
-import Modal from "./components/Modal/Modal";
-import Buttons from "./components/Buttons/Buttons";
-const App=() =>{
-  const [data,setdata]=React.useState({
-    confirmed:"",
-    recovered:"",
-    deaths:""
-  })
-  const [spinner,setspinner]=React.useState(false);
-  const [countries,setcountries]=React.useState(["Global"])
-  const [lastupdate,setlastupdate]=React.useState("")
-  const [country,setcountry]=React.useState("Global");
-  const [overall,setoverall]=React.useState([]);
-  const [error,seterror]=React.useState(false);
-  const [show,setshow]=React.useState(false);
-  const [type,settype]=React.useState("");
-  function onchange(events){
-    setcountry(events.target.value)
-  }
 
-  React.useEffect(()=>{
-    axios.get("https://covid19.mathdro.id/api/countries")
-    .then(res=>{
-      let infocountries=[]
-      for(var i=0;i<res.data.countries.length;i++){
-           infocountries.push(res.data.countries[i].name);
+const API_BASE = "https://disease.sh/v3/covid-19";
+
+const App = () => {
+  const [data, setData] = React.useState({
+    confirmed: 0,
+    recovered: 0,
+    deaths: 0,
+    updated: null
+  });
+  const [loading, setLoading] = React.useState(true);
+  const [countries, setCountries] = React.useState(["Global"]);
+  const [country, setCountry] = React.useState("Global");
+  const [historicalData, setHistoricalData] = React.useState({});
+  const [error, setError] = React.useState(null);
+
+  // Fetch initial data
+  React.useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [countriesRes, globalRes, historicalRes] = await Promise.all([
+          axios.get(`${API_BASE}/countries`),
+          axios.get(`${API_BASE}/all`),
+          axios.get(`${API_BASE}/historical/all?lastdays=120`)
+        ]);
+
+        setCountries(["Global", ...countriesRes.data.map(c => c.country)]);
+        setData({
+          confirmed: globalRes.data.cases,
+          recovered: globalRes.data.recovered,
+          deaths: globalRes.data.deaths,
+          updated: globalRes.data.updated
+        });
+        setHistoricalData(historicalRes.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch initial data. Please try again later.");
+        setLoading(false);
       }
-      setcountries((prevalue) =>{
-        return [...prevalue,...infocountries]
-      })
-    })
-  },[])
+    };
 
-  React.useEffect(()=>{
-    axios.get("https://covid19.mathdro.id/api/daily")
-    .then(res=>{
-      let initial=[]
-      res.data.map((dailydata) =>{
-         initial.push({
-           confirmed:dailydata.confirmed.total,
-           deaths:dailydata.deaths.total,
-           date:dailydata.reportDate
-         })
-      })
-      setoverall((prevalue)=>{
-        return [...prevalue,...initial]
-      })
-    })
-  },[])
+    fetchInitialData();
+  }, []);
 
-  React.useEffect(() =>{
-    setspinner(true)
-     if(country==="Global"){
-       axios.get('https://covid19.mathdro.id/api')
-       .then(res =>{
-         setdata((prevalue) =>{
-           return {
-             ...prevalue,
-            confirmed:res.data.confirmed.value,
-            recovered:res.data.recovered.value,
-            deaths:res.data.deaths.value
-           }
-         })
-         setlastupdate(res.data.lastUpdate)
-         setspinner(false)    
-       })
-       .catch(err =>{
-         setspinner(false)
-         seterror(true)
-       })
-     }
-     else{
-       axios.get("https://covid19.mathdro.id/api/countries/"+country)
-       .then(res =>{
-        setdata((prevalue) =>{
-          return {
-            ...prevalue,
-           confirmed:res.data.confirmed.value,
-           recovered:res.data.recovered.value,
-           deaths:res.data.deaths.value
-          }
-        })
-        setlastupdate(res.data.lastUpdate)
-        setspinner(false)
-       })
-       .catch(err=>{
-         setspinner(false)
-         seterror(true)
-       })
-     }
-  },[country])
+  // Fetch data when country changes
+  React.useEffect(() => {
+    if (loading) return;
 
-  function onclickblue(){
-    setshow(true);
-    settype("Confirmed");
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let url = `${API_BASE}/all`;
+        let histUrl = `${API_BASE}/historical/all?lastdays=120`;
+
+        if (country !== "Global") {
+          url = `${API_BASE}/countries/${country}`;
+          histUrl = `${API_BASE}/historical/${country}?lastdays=120`;
+        }
+
+        const [dataRes, histRes] = await Promise.all([
+          axios.get(url),
+          axios.get(histUrl).catch(() => ({ data: null })) // Some countries might not have historical data
+        ]);
+
+        setData({
+          confirmed: dataRes.data.cases,
+          recovered: dataRes.data.recovered,
+          deaths: dataRes.data.deaths,
+          updated: dataRes.data.updated
+        });
+
+        // Historical data structure differs for countries vs global
+        if (country === "Global") {
+          setHistoricalData(histRes.data);
+        } else {
+          setHistoricalData(histRes.data?.timeline || null);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch data for " + country);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [country]);
+
+  const handleCountryChange = (event) => {
+    setCountry(event.target.value);
+  };
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h1>Error</h1>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
   }
 
-  function onclickred(){
-    setshow(true);
-    settype("Deaths");
-  }
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1>COVID-19 <span className="highlight">Tracker</span></h1>
+        <p className="subtitle">Real-time Global Virus Statistics</p>
+      </header>
 
-  function crossclick(){
-    setshow(false);
-    settype("");
-  }
+      {loading && <Spinner />}
+      
+      {!loading && (
+        <>
+          <Cards {...data} />
+          <div className="controls">
+            <Box countries={countries} clicked={handleCountryChange} value={country} />
+          </div>
+          <Graph 
+            confirmed={data.confirmed}
+            recovered={data.recovered}
+            deaths={data.deaths}
+            historicalData={historicalData} 
+            country={country} 
+          />
+        </>
+      )}
+      
+      <footer className="app-footer">
+        <p>Data provided by disease.sh</p>
+      </footer>
+    </div>
+  );
+};
 
-  if(spinner===true){
-    return <Spinner />
-  }
-  if(error===true){
-    return <h1 style={{textAlign:"center",marginTop:300}}>Network Error !!!!!!</h1>
-  }
-  return(
-    <Aux>
-    <img src={image}></img>
-    <Cards {...data} update={lastupdate} />
-    {show?<Modal show={show} type={type} crossclick={crossclick}/>:null}
-    <Box countries={countries} clicked={onchange} value={country}/>
-    <Buttons onclickred={onclickred} onclickblue={onclickblue}/>
-    <Graph {...data} globaldata={overall} country={country}/>
-    </Aux>
-  )
-}
-
-export default App;
+export default App;
